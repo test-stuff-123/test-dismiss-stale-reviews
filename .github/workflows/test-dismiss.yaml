@@ -16,6 +16,11 @@ jobs:
   test-dismiss:
     runs-on: ubuntu-latest
     steps:
+      - name: Add Node 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -39,7 +44,7 @@ jobs:
           echo "token=$token" >> $GITHUB_OUTPUT
 
       - name: Dismiss stale reviews
-        uses: pace-int-dev/dismiss-stale-reviews@ec92402e63fe41148c91c54c0d6f556b861940fd
+        uses: balvajs/dismiss-stale-reviews@v2
         with:
           token: ${{ steps.generate-token.outputs.token }}
           #no-owner-action: dismiss-none
