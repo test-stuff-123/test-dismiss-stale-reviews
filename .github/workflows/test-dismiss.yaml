@@ -1,0 +1,33 @@
+jobs:
+  move_thresholds:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install JWT
+        run: |
+          pip3 install -q jwt
+      - name: Generate JWT
+        id: generate-jwt
+        run: |
+          jwt=$(python3 $GITHUB_WORKSPACE/.github/scripts/generate_jwt.py \
+           "${{ secrets.APP_ID }}" "${{ secrets.APP_PRIVATE_KEY }}")
+          echo "jwt=$jwt" >> $GITHUB_OUTPUT
+      
+      - name: Generate Token
+        id: generate-token
+        run: |
+          token=$(curl --request POST \
+          --url "https://api.github.com/app/installations/${{ secrets.APP_INSTALLATION_ID }}/access_tokens" \
+          --header "Accept: application/vnd.github+json" --header "Authorization: Bearer ${{ steps.generate-jwt.outputs.jwt }}" \
+          --header "X-GitHub-Api-Version: 2022-11-28" | jq -r '.token')
+          echo "token=$token" >> $GITHUB_OUTPUT
+
+      - name: Dismiss stale reviews
+        uses: pace-int-dev/dismiss-stale-reviews@ec92402e63fe41148c91c54c0d6f556b861940fd
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          #no-owner-action: dismiss-none
+          #force-push-action: dismiss-none
+          #ignore-files: |
