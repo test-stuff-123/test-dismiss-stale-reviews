@@ -1,9 +1,31 @@
+name: 'Test dismiss stale reviews'
+
+on:
+  pull_request:
+    branches: [main]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - converted_to_draft
+      - ready_for_review
+  push:
+    branches: [main]
+
 jobs:
-  move_thresholds:
+  test-reviews:
     runs-on: ubuntu-latest
     steps:
+
+      - name: Add Node 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Install JWT
         run: |
@@ -25,9 +47,9 @@ jobs:
           echo "token=$token" >> $GITHUB_OUTPUT
 
       - name: Dismiss stale reviews
-        uses: pace-int-dev/dismiss-stale-reviews@ec92402e63fe41148c91c54c0d6f556b861940fd
+        uses: balvajs/dismiss-stale-reviews@v2
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          #no-owner-action: dismiss-none
-          #force-push-action: dismiss-none
+          # no-owner-action: dismiss-none
+          # force-push-action: dismiss-none:
           #ignore-files: |
